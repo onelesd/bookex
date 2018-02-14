@@ -9,7 +9,7 @@ defmodule Bookex.Application do
     # List all child processes to be supervised
     children = [
       # Starts a worker by calling: Bookex.Worker.start_link(arg)
-      # {Bookex.Worker, arg},
+      # {Bookex.API, []},
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
