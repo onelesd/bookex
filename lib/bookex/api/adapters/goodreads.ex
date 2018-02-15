@@ -15,11 +15,11 @@ defmodule Bookex.API.Adapters.Goodreads do
   plug(Tesla.Middleware.Query, key: @key)
   plug(Tesla.Middleware.DebugLogger)
 
-  # plug Tesla.Middleware.Tuples # return {:ok, env} | {:error, reason} instead of raising exception
+  # plug(Tesla.Middleware.Tuples) # return {:ok, env} | {:error, reason} instead of raising exception
   # plug(Tesla.Middleware.Logger)
 
   @doc """
-  Get an xml response with the Goodreads url for the given author name.
+  Get an xml response for the given author name.
   """
   @spec search_author(String.t()) :: [Bookex.Author.t()]
   def search_author(query) do
@@ -46,7 +46,29 @@ defmodule Bookex.API.Adapters.Goodreads do
   end
 
   @doc """
-  Get an xml response with the Goodreads url for the given book title.
+  Get an xml response for the given author id.
+  """
+  @spec find_author(String.t() | integer()) :: [Bookex.Author.t()]
+  def find_author(query) do
+    response = get("/author/show/#{query}")
+
+    case response.status do
+      200 ->
+        name =
+          response.body
+          |> Meeseeks.parse()
+          |> Meeseeks.one(xpath("//author/name"))
+          |> Meeseeks.text()
+
+        %Bookex.Author{name: name, meta: %{goodreads: %{id: query}}}
+
+      _ ->
+        nil
+    end
+  end
+
+  @doc """
+  Get an xml response for the given book title.
   """
   @spec search_book(String.t()) :: [Bookex.Book.t()]
   def search_book(query) do
@@ -84,4 +106,30 @@ defmodule Bookex.API.Adapters.Goodreads do
         []
     end
   end
+
+  @doc """
+  Get an xml response for the given author id.
+  """
+  @spec find_book(String.t() | integer()) :: [Bookex.Book.t()]
+  def find_book(query) do
+    response = get("/book/show/#{query}.xml")
+
+    case response.status do
+      200 ->
+        title =
+          response.body
+          |> Meeseeks.parse()
+          |> Meeseeks.one(xpath("//book/title"))
+          |> Meeseeks.text()
+          |> cdata()
+
+        %Bookex.Book{title: title, meta: %{goodreads: %{id: query}}}
+
+      _ ->
+        nil
+    end
+  end
+
+  defp cdata("<![CDATA[" <> string), do: String.replace(string, ~r/\]\]>$/, "")
+  defp cdata(string), do: string
 end

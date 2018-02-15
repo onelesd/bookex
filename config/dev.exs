@@ -1,7 +1,6 @@
 use Mix.Config
 
-config :bookex, Bookex.API.Client,
-  adapter: Bookex.API.Adapters.Goodreads
+config :bookex, Bookex.API.Client, adapter: Bookex.API.Adapters.Goodreads
 
 config :bookex, Bookex.API.Adapters.Goodreads,
   key: "xs38cKhZadJq60VZilTM1A",
