@@ -1,20 +1,35 @@
 defmodule Bookex.Application do
-  # See https://hexdocs.pm/elixir/Application.html
-  # for more information on OTP Applications
-  @moduledoc false
-
   use Application
 
+  # See https://hexdocs.pm/elixir/Application.html
+  # for more information on OTP Applications
   def start(_type, _args) do
-    # List all child processes to be supervised
+    import Supervisor.Spec
+
+    # Define workers and child supervisors to be supervised
     children = [
-      # Starts a worker by calling: Bookex.Worker.start_link(arg)
-      # {Bookex.API, []},
+      # Start the endpoint when the application starts
+      {Bookex.API, []},
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Bookex.Supervisor]
-    Supervisor.start_link(children, opts)
+    case Mix.env do
+      :dev ->
+        watchers =
+          Application.get_env(:bookex, Bookex.API.Watcher)[:watchers]
+          |> Enum.map(fn {cmd, args} ->
+            worker(Bookex.API.Watcher, watcher_args(cmd, args),
+              id: {cmd, args}, restart: :transient)
+          end)
+        Supervisor.start_link(watchers ++ children, opts)
+      _    -> Supervisor.start_link(children, opts)
+    end
+  end
+
+  defp watcher_args(cmd, cmd_args) do
+    {args, opts} = Enum.split_while(cmd_args, &is_binary(&1))
+    [cmd, args, opts]
   end
 end

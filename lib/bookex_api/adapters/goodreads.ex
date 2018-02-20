@@ -13,10 +13,10 @@ defmodule Bookex.API.Adapters.Goodreads do
 
   plug(Tesla.Middleware.BaseUrl, @base_url)
   plug(Tesla.Middleware.Query, key: @key)
-  plug(Tesla.Middleware.DebugLogger)
+  # plug(Tesla.Middleware.DebugLogger)
 
   # plug(Tesla.Middleware.Tuples) # return {:ok, env} | {:error, reason} instead of raising exception
-  # plug(Tesla.Middleware.Logger)
+  plug(Tesla.Middleware.Logger)
 
   @doc """
   Get an xml response for the given author name.
@@ -37,7 +37,7 @@ defmodule Bookex.API.Adapters.Goodreads do
             Meeseeks.one(author, xpath("//name"))
             |> Meeseeks.data()
 
-          %Bookex.Author{name: name, meta: %{goodreads: %{id: id}}}
+          %Bookex.Author{id: id, name: name, meta: %{goodreads: %{id: id}}}
         end)
 
       _ ->
@@ -60,7 +60,7 @@ defmodule Bookex.API.Adapters.Goodreads do
           |> Meeseeks.one(xpath("//author/name"))
           |> Meeseeks.text()
 
-        %Bookex.Author{name: name, meta: %{goodreads: %{id: query}}}
+        %Bookex.Author{id: query, name: name, meta: %{goodreads: %{id: query}}}
 
       _ ->
         nil
@@ -81,11 +81,19 @@ defmodule Bookex.API.Adapters.Goodreads do
         |> Meeseeks.all(xpath("//goodreadsresponse/search/results/work"))
         |> Enum.map(fn work ->
           id =
-            Meeseeks.one(work, xpath("//id"))
+            Meeseeks.one(work, xpath("//best_book/id"))
             |> Meeseeks.text()
 
           title =
             Meeseeks.one(work, xpath("//title"))
+            |> Meeseeks.text()
+
+          thumb_url =
+            Meeseeks.one(work, xpath("//best_book/small_image_url"))
+            |> Meeseeks.text()
+
+          image_url =
+            Meeseeks.one(work, xpath("//best_book/image_url"))
             |> Meeseeks.text()
 
           author_id =
@@ -97,10 +105,20 @@ defmodule Bookex.API.Adapters.Goodreads do
             |> Meeseeks.text()
 
           %Bookex.Book{
+            id: id,
             title: title,
-            meta: %{goodreads: %{id: id, author_id: author_id, author_name: author_name}}
+            thumb_url: thumb_url,
+            image_url: image_url,
+            meta: %{
+              goodreads: %{
+                id: id,
+                author_id: author_id,
+                author_name: author_name
+              }
+            }
           }
         end)
+        |> Enum.sort(& &1.title <= &2.title)
 
       _ ->
         []
@@ -116,14 +134,37 @@ defmodule Bookex.API.Adapters.Goodreads do
 
     case response.status do
       200 ->
-        title =
+        work =
           response.body
           |> Meeseeks.parse()
+
+        title =
+          work
           |> Meeseeks.one(xpath("//book/title"))
           |> Meeseeks.text()
           |> cdata()
 
-        %Bookex.Book{title: title, meta: %{goodreads: %{id: query}}}
+        thumb_url =
+          work
+          |> Meeseeks.one(xpath("//book/small_image_url"))
+          |> Meeseeks.text()
+
+        image_url =
+          work
+          |> Meeseeks.one(xpath("//book/image_url"))
+          |> Meeseeks.text()
+
+        %Bookex.Book{
+          id: query,
+          title: title,
+          thumb_url: thumb_url,
+          image_url: image_url,
+          meta: %{
+            goodreads: %{
+              id: query
+            }
+          }
+        }
 
       _ ->
         nil
