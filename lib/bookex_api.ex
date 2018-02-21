@@ -36,7 +36,7 @@ defmodule Bookex.API do
   defp send_json_resp(conn, resp) do
     conn
     |> put_resp_header("content-type", "application/json")
-    |> send_resp(200, IO.inspect(Jason.encode!(resp)))
+    |> send_resp(200, Jason.encode!(resp))
   end
 
   defp bootstrap do

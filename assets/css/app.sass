@@ -1,12 +1,22 @@
 body
-  background: #eee
+  background: #369
   color: #333
-div.bookList
-  width: 500px
-  div
+
+.bookList
+  display: flex
+  height: 500px
+  flex-direction: row
+  flex-wrap: wrap
+  justify-content: space-around
+  align-items: center
+  align-content: space-around
+  &__item
+    background: #69c
+    height: 140px
+    width: 200px
     cursor: hand
     text-decoration: underline
     color: #00f
-    margin: 9px
+    margin: auto
     padding: 8px
     border: 1px solid #ccc

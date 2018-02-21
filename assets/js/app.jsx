@@ -35,11 +35,11 @@ const view = (state, actions) => (
     <input type='text'
           value={state.titleSearchText}
           oninput={e => actions.updateTitleSearchText(e.target.value)}/>
-    <div class="bookList">
+    <div class='bookList'>
       {
         state.bookData.map((book, idx) => (
-          <div onclick={() => actions.selectBook(idx)}>
-            <img src={book.thumb_url}/>
+          <div class='bookList__item' onclick={() => actions.selectBook(idx)}>
+            <img src={book.thumb_url}/><br/>
             {book.title}
           </div>
         ))
@@ -49,7 +49,7 @@ const view = (state, actions) => (
     {
       state.selectedBook ? (
         <div>
-          <img src={state.bookData[state.selectedBook].image_url}/>
+          <img src={state.bookData[state.selectedBook].image_url}/><br />
           {state.bookData[state.selectedBook].title}
         </div>
       ) : (
