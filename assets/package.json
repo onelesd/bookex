@@ -6,6 +6,7 @@
     "watch": "parcel watch web/static/js/app.js --out-dir priv/static/js"
   },
   "dependencies": {
+    "@hyperapp/logger": "^0.4.1",
     "babel-plugin-transform-react-jsx": "^6.24.1",
     "babel-preset-env": "^1.6.1",
     "babel-preset-es2015": "^6.24.1",

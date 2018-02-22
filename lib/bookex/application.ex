@@ -8,8 +8,8 @@ defmodule Bookex.Application do
 
     # Define workers and child supervisors to be supervised
     children = [
-      # Start the endpoint when the application starts
-      {Bookex.API, []},
+      {Bookex.API, []}, # Start the endpoint when the application starts
+      worker(Cachex, [ :search_book, [] ]), # cache for &Bookex.API.Client.search_book
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

@@ -31,7 +31,8 @@ defmodule Bookex.Mixfile do
       {:plug, "~> 1.4.5"},
       {:tesla, "~> 0.10.0"},
       {:meeseeks, "~> 0.7.7"},
-      {:jason, "~> 1.0.0"}
+      {:jason, "~> 1.0.0"},
+      {:cachex, "~> 3.0.0"},
     ]
   end
 end

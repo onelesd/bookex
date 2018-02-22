@@ -1,22 +1,55 @@
+@import 'theme'
+
 body
-  background: #369
-  color: #333
+  @extend %w3-theme
+  @extend %font-face
 
 .bookList
-  display: flex
   height: 500px
+  display: flex
   flex-direction: row
   flex-wrap: wrap
-  justify-content: space-around
+  justify-content: flex-start
   align-items: center
   align-content: space-around
-  &__item
-    background: #69c
-    height: 140px
-    width: 200px
-    cursor: hand
-    text-decoration: underline
-    color: #00f
-    margin: auto
-    padding: 8px
-    border: 1px solid #ccc
+
+.bookList__item
+  @extend %w3-theme-d1
+  @extend %w3-border-theme
+  height: 140px
+  width: 200px
+  cursor: hand
+  margin: auto
+  padding: 8px
+  border-width: 1px
+  border-style: solid
+  img
+    margin-right: 8px
+    margin-bottom: 8px
+  &:hover
+    @extend %w3-theme-l1
+
+.main
+  margin-top: 15px
+  display: grid
+  grid-gap: 10px
+  grid-template-columns: [col] 200px [col] auto
+  grid-template-rows: [row] auto [row]
+  justify-items: center
+
+.bookSearch
+  grid-column: col / span 4
+  grid-row: row 1
+  input
+    font-size: 28px
+    width: 800px
+    text-align: center
+
+.bookList
+  grid-column: col 2 / span 3
+  grid-row: row 2
+
+.bookList__selected
+  height: 200px
+  grid-column: col
+  grid-row: row 2

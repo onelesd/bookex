@@ -1,5 +1,6 @@
 import debounce from 'debounce-promise'
 import { h, app } from 'hyperapp'
+import logger from '@hyperapp/logger'
 import 'normalize.css'
 import '../css/app.sass'
 
@@ -25,48 +26,45 @@ const actions = {
     {selectedBook}
   ),
   setBookData: bookData => state => (
-    {bookData: bookData.books}
+    {
+      bookData: bookData.books,
+      selectedBook: null
+    }
   )
 }
 
 const view = (state, actions) => (
   <div class='main'>
-    <h1>Search book titles</h1>
-    <input type='text'
-          value={state.titleSearchText}
-          oninput={e => actions.updateTitleSearchText(e.target.value)}/>
+    <div class='bookSearch'>
+      <input type='text'
+             placeholder='Search book titles'
+             value={state.titleSearchText}
+             oninput={e => actions.updateTitleSearchText(e.target.value)}/>
+    </div>
     <div class='bookList'>
       {
         state.bookData.map((book, idx) => (
           <div class='bookList__item' onclick={() => actions.selectBook(idx)}>
-            <img src={book.thumb_url}/><br/>
+            <img src={book.thumb_url}/>
             {book.title}
           </div>
         ))
       }
     </div>
-    <div class='showBook'>
     {
-      state.selectedBook ? (
-        <div>
-          <img src={state.bookData[state.selectedBook].image_url}/><br />
-          {state.bookData[state.selectedBook].title}
+      state.selectedBook != null ? (
+        <div class='bookList__item bookList__selected'>
+          <div>
+            <img src={state.bookData[state.selectedBook].image_url}/>
+            {state.bookData[state.selectedBook].title}
+          </div>
         </div>
       ) : (
         <div></div>
       )
     }
-    </div>
   </div>
 )
 
-app(
-  state,
-  actions,
-  // view,
-  function(state, actions) {
-    console.log(state)
-    return view(state, actions)
-  },
-  document.body
-)
+logger({})(app)(state, actions, view, document.body) // dev
+// app(state, actions, view, document.body) // prod

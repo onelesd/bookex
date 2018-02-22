@@ -15,8 +15,10 @@ defmodule Bookex.API do
 
   @scope "/api/v1"
 
+  get @scope <> "/search_book/", do: send_json_resp(conn, %{books: []})
   get @scope <> "/search_book/:title" do
-    books = Bookex.API.Client.search_book(title)
+    books = client_cache(:search_book, title, &Bookex.API.Client.search_book/1)
+    # books = Bookex.API.Client.search_book(title)
     send_json_resp(conn, %{books: books})
   end
 
@@ -51,6 +53,21 @@ defmodule Bookex.API do
     </body>
     </html>
     """
+  end
+
+  defp client_cache(cache_name, key, fun) do
+    case Cachex.get(cache_name, key) do
+      {:ok, entry} when not is_nil(entry) ->
+        # cache hit
+        Logger.info("Cachex hit (#{cache_name}): #{key}")
+        entry
+      _ ->
+        # cache miss, or other cache-related error
+        Logger.info("Cachex miss (#{cache_name}): #{key}")
+        entry = fun.(key)
+        Cachex.put(cache_name, key, entry)
+        entry
+    end
   end
 
   def init(options) do
